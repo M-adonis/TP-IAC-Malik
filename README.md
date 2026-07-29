@@ -13,3 +13,4 @@ Dépôt d'infrastructure as code - TP Module 2.
 
     make help
 test signature
+test protection
