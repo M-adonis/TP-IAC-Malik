@@ -12,3 +12,4 @@ Dépôt d'infrastructure as code - TP Module 2.
 ## Utilisation
 
     make help
+test signature
