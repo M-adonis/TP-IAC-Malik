@@ -1,0 +1,59 @@
+name: Terraform Ansible Pipeline
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Install TFLint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -qO- https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
+
+      - name: Verify Trivy
+        run: trivy --version
+
+      - name: Terraform Format Check
+        run: make fmt
+
+      - name: TFLint
+        run: make tflint
+
+      - name: Trivy
+        run: make trivy
+
+  deploy:
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Apply
+        run: make apply
+
+      - name: Generate Inventory
+        run: make inventory
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+
+      - name: Run Playbook
+        run: make ansible
